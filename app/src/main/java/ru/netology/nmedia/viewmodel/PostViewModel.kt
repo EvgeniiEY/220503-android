@@ -37,10 +37,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadPosts() {
 
-        _data.value = FeedModel(loading = true)
-        repository.getAllAsync(object : PostRepository.GetAllCallback {
-            override fun onSuccess(posts: List<Post>) {
-                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        _data.postValue(FeedModel(loading = true))
+        repository.getAllAsync(object : PostRepository.PostCallback<List<Post>> {
+            override fun onSuccess(value: List<Post>) {
+                _data.postValue(FeedModel(posts = value, empty = value.isEmpty()))
             }
 
             override fun onError(e: Exception) {
@@ -49,18 +49,71 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-//        thread {
-//            // Начинаем загрузку
-//            _data.postValue(FeedModel(loading = true))
-//            try {
-//                // Данные успешно получены
-//                val posts = repository.getAll()
-//                FeedModel(posts = posts, empty = posts.isEmpty())
-//            } catch (e: IOException) {
-//                // Получена ошибка
-//                FeedModel(error = true)
-//            }.also(_data::postValue)
+    fun likeById() {
+
+        _data.postValue(FeedModel(loading = true))
+        repository.likeByIdAsync(object : PostRepository.PostCallback<List<Post>> {
+            override fun onSuccess(value: List<Post>) {
+                _data.value?.copy(posts = _data.value?.posts.orEmpty())
+
+//                        if (post.id != id) it
+//                        else post
+//                    }
+            }
+
+            override fun onError(e: Exception) {
+                _data.postValue(FeedModel(error = true))
+            }
+
+        })
+    }
+
+
+    //        thread {
+//
+//            val post = repository.likeByIdAsync(object : PostRepository.PostCallback<List<Post>> {
+//                _data.postValue(
+//                _data.value?.copy(posts = _data.value?.posts.orEmpty()
+//                .map {
+//                    if (it.id != id) it
+//                    else post
+//                }
+//                )
+//                )
+//            }
 //        }
+    fun unlikeById() {
+        _data.postValue(FeedModel(loading = true))
+        repository.likeByIdAsync(object : PostRepository.PostCallback<List<Post>> {
+            override fun onSuccess(value: List<Post>) {
+                _data.value?.copy(posts = _data.value?.posts.orEmpty())
+
+//                        if (post.id != id) it
+//                        else post
+//                    }
+            }
+
+            override fun onError(e: Exception) {
+                _data.postValue(FeedModel(error = true))
+            }
+
+        })
+    }
+
+
+//        thread {
+//
+//            val post = repository.unlikeById(id)
+//            _data.postValue(
+//                _data.value?.copy(posts = _data.value?.posts.orEmpty()
+//                    .map {
+//                        if (it.id != id) it
+//                        else post
+//                    }
+//                )
+//            )
+//        }
+//    }
 
 
     fun save() {
@@ -83,36 +136,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         edited.value = edited.value?.copy(content = text)
-    }
-
-    fun likeById(id: Long) {
-        thread {
-
-            val post = repository.likeById(id)
-            _data.postValue(
-                _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                    .map {
-                        if (it.id != id) it
-                        else post
-                    }
-                )
-            )
-        }
-    }
-
-    fun unlikeById(id: Long) {
-        thread {
-
-            val post = repository.unlikeById(id)
-            _data.postValue(
-                _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                    .map {
-                        if (it.id != id) it
-                        else post
-                    }
-                )
-            )
-        }
     }
 
 
