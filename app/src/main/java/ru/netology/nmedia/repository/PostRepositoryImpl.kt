@@ -61,11 +61,11 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-    override fun likeByIdAsync(callback: PostRepository.PostCallback<List<Post>>) {
+    override fun likeByIdAsync( id: Long, callback: PostRepository.PostCallback<Post>) {
 
         val request: Request = Request.Builder()
             .post("".toRequestBody())
-            .url("$BASE_URL/api/slow/posts/post.id}/likes")
+            .url("$BASE_URL/api/slow/posts/$id/likes")
             .build()
 
         return client.newCall(request)
@@ -75,7 +75,7 @@ class PostRepositoryImpl : PostRepository {
                     val body =
                         response.body?.string() ?: throw java.lang.RuntimeException("body is null")
                     try {
-                        callback.onSuccess(gson.fromJson(body, typeToken.type))
+                        callback.onSuccess(gson.fromJson(body, Post::class.java))
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
@@ -88,11 +88,11 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-    override fun unlikeByIdAsync(callback: PostRepository.PostCallback<List<Post>>) {
+    override fun unlikeByIdAsync( id: Long, callback: PostRepository.PostCallback<Post>) {
 
         val request: Request = Request.Builder()
             .delete()
-            .url("$BASE_URL/api/slow/posts/post.id/likes")
+            .url("$BASE_URL/api/slow/posts/$id/likes")
             .build()
 
         return client.newCall(request)
@@ -102,7 +102,7 @@ class PostRepositoryImpl : PostRepository {
                     val body =
                         response.body?.string() ?: throw java.lang.RuntimeException("body is null")
                     try {
-                        callback.onSuccess(gson.fromJson(body, typeToken.type))
+                        callback.onSuccess(gson.fromJson(body, Post::class.java))
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
@@ -121,25 +121,54 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-    override fun save(post: Post) {
+    override fun saveAsync(post: Post, callback: PostRepository.PostCallback<Post>) {
         val request: Request = Request.Builder()
             .post(gson.toJson(post).toRequestBody(jsonType))
             .url("${BASE_URL}/api/slow/posts")
             .build()
 
         client.newCall(request)
-            .execute()
-            .close()
+            .enqueue(object : Callback {
+
+                override fun onResponse(call: Call, response: Response) {
+                    val body =
+                        response.body?.string() ?: throw java.lang.RuntimeException("body is null")
+                    try {
+                        callback.onSuccess(gson.fromJson(body, Post::class.java))
+                    } catch (e: Exception) {
+                        callback.onError(e)
+                    }
+                }
+
+                override fun onFailure(call: Call, e: IOException) {
+                    callback.onError(e)
+                }
+            })
+
     }
 
-    override fun removeById(id: Long) {
+    override fun removeByIdAsync(id: Long, callback: PostRepository.PostCallback<Unit>) {
         val request: Request = Request.Builder()
             .delete()
             .url("${BASE_URL}/api/slow/posts/$id")
             .build()
 
         client.newCall(request)
-            .execute()
-            .close()
+            .enqueue(object : Callback {
+
+                override fun onResponse(call: Call, response: Response) {
+                    val body =
+                        response.body?.string() ?: throw java.lang.RuntimeException("body is null")
+                    try {
+                        callback.onSuccess(Unit)
+                    } catch (e: Exception) {
+                        callback.onError(e)
+                    }
+                }
+
+                override fun onFailure(call: Call, e: IOException) {
+                    callback.onError(e)
+                }
+            })
     }
 }
