@@ -109,20 +109,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-//    thread {
-//        // Оптимистичная модель
-//        val old = _data.value?.posts.orEmpty()
-//        _data.postValue(
-//            _data.value?.copy(posts = _data.value?.posts.orEmpty()
-//                .filter { it.id != id }
-//            )
-//        )
-//        try {
-//            repository.removeByIdAsync(id)
-//        } catch (e: IOException) {
-//            _data.postValue(_data.value?.copy(posts = old))
-//        }
-//    }
+
 
 
 

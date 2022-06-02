@@ -61,7 +61,7 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-    override fun likeByIdAsync( id: Long, callback: PostRepository.PostCallback<Post>) {
+    override fun likeByIdAsync(id: Long, callback: PostRepository.PostCallback<Post>) {
 
         val request: Request = Request.Builder()
             .post("".toRequestBody())
@@ -88,7 +88,7 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-    override fun unlikeByIdAsync( id: Long, callback: PostRepository.PostCallback<Post>) {
+    override fun unlikeByIdAsync(id: Long, callback: PostRepository.PostCallback<Post>) {
 
         val request: Request = Request.Builder()
             .delete()
@@ -113,11 +113,7 @@ class PostRepositoryImpl : PostRepository {
                 }
             })
 
-//            .execute()
-//            .let { it.body?.string() ?: throw java.lang.RuntimeException("body is null") }
-//            .let {
-//                gson.fromJson(it, Post::class.java)
-//            }
+
     }
 
 
