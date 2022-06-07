@@ -26,8 +26,7 @@ import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.databinding.ActivityAppBinding
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
-    private val urls = listOf("netology.jpg", "sber.jpg", "tcs.jpg")
-    private var index = 0
+
 
 
 
@@ -35,9 +34,6 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       val binding = ActivityAppBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
 
         intent?.let {
             if (it.action != Intent.ACTION_SEND) {
@@ -59,12 +55,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 )
         }
 
-        val url = ("http://10.0.2.2:9999/avatars/${urls[index++]}")
-        Glide.with(this)
-            .load(url)
-            .placeholder(R.drawable.adaptive_icon_background)
-            .timeout(10_000)
-            .into(findViewById(R.id.avatar))
+
 
         checkGoogleApiAvailability()
 
