@@ -1,5 +1,6 @@
 package ru.netology.nmedia.repository
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
@@ -72,12 +73,17 @@ class PostRepositoryImpl : PostRepository {
             .enqueue(object : Callback {
 
                 override fun onResponse(call: Call, response: Response) {
+                    Log.d("NETWORK REQUEST", response.code.toString())
+                    if (response.isSuccessful) {
                     val body =
                         response.body?.string() ?: throw java.lang.RuntimeException("body is null")
                     try {
                         callback.onSuccess(gson.fromJson(body, Post::class.java))
                     } catch (e: Exception) {
                         callback.onError(e)
+                    }
+                    } else {
+                        callback.onError(Exception(response.message + " E R R O R ! ! ! ! "))
                     }
                 }
 
