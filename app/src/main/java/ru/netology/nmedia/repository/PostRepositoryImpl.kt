@@ -7,6 +7,7 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.util.AndroidUtils
 import java.io.IOException
 import java.lang.Exception
 import java.util.concurrent.TimeUnit
@@ -46,6 +47,8 @@ class PostRepositoryImpl : PostRepository {
             .enqueue(object : Callback {
 
                 override fun onResponse(call: Call, response: Response) {
+                    Log.d("NETWORK REQUEST", response.code.toString())
+                    if (response.isSuccessful) {
                     val body =
                         response.body?.string() ?: throw java.lang.RuntimeException("body is null")
                     try {
@@ -53,14 +56,15 @@ class PostRepositoryImpl : PostRepository {
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
+                    } else {
+                        callback.onError(Exception(response.message))
+                    }
                 }
-
                 override fun onFailure(call: Call, e: IOException) {
                     callback.onError(e)
                 }
             })
     }
-
 
     override fun likeByIdAsync(id: Long, callback: PostRepository.PostCallback<Post>) {
 
@@ -69,28 +73,8 @@ class PostRepositoryImpl : PostRepository {
             .url("$BASE_URL/api/slow/posts/$id/likes")
             .build()
 
-        return client.newCall(request)
-            .enqueue(object : Callback {
+        clientNewCall(id, callback, request)
 
-                override fun onResponse(call: Call, response: Response) {
-                    Log.d("NETWORK REQUEST", response.code.toString())
-                    if (response.isSuccessful) {
-                    val body =
-                        response.body?.string() ?: throw java.lang.RuntimeException("body is null")
-                    try {
-                        callback.onSuccess(gson.fromJson(body, Post::class.java))
-                    } catch (e: Exception) {
-                        callback.onError(e)
-                    }
-                    } else {
-                        callback.onError(Exception(response.message + " E R R O R ! ! ! ! "))
-                    }
-                }
-
-                override fun onFailure(call: Call, e: IOException) {
-                    callback.onError(e)
-                }
-            })
     }
 
 
@@ -101,24 +85,7 @@ class PostRepositoryImpl : PostRepository {
             .url("$BASE_URL/api/slow/posts/$id/likes")
             .build()
 
-        return client.newCall(request)
-            .enqueue(object : Callback {
-
-                override fun onResponse(call: Call, response: Response) {
-                    val body =
-                        response.body?.string() ?: throw java.lang.RuntimeException("body is null")
-                    try {
-                        callback.onSuccess(gson.fromJson(body, Post::class.java))
-                    } catch (e: Exception) {
-                        callback.onError(e)
-                    }
-                }
-
-                override fun onFailure(call: Call, e: IOException) {
-                    callback.onError(e)
-                }
-            })
-
+           clientNewCall(id, callback, request)
 
     }
 
@@ -129,16 +96,25 @@ class PostRepositoryImpl : PostRepository {
             .url("${BASE_URL}/api/slow/posts")
             .build()
 
+
+
         client.newCall(request)
             .enqueue(object : Callback {
 
                 override fun onResponse(call: Call, response: Response) {
-                    val body =
-                        response.body?.string() ?: throw java.lang.RuntimeException("body is null")
-                    try {
-                        callback.onSuccess(gson.fromJson(body, Post::class.java))
-                    } catch (e: Exception) {
-                        callback.onError(e)
+                    Log.d("NETWORK REQUEST", response.code.toString())
+                    if (response.isSuccessful) {
+                        val body =
+                            response.body?.string()
+                                ?: throw java.lang.RuntimeException("body is null")
+                        try {
+                            callback.onSuccess(gson.fromJson(body, Post::class.java))
+                        } catch (e: Exception) {
+                            callback.onError(e)
+                        }
+
+                    } else {
+                        callback.onError(Exception(response.message))
                     }
                 }
 
@@ -159,12 +135,19 @@ class PostRepositoryImpl : PostRepository {
             .enqueue(object : Callback {
 
                 override fun onResponse(call: Call, response: Response) {
-                    val body =
-                        response.body?.string() ?: throw java.lang.RuntimeException("body is null")
-                    try {
-                        callback.onSuccess(Unit)
-                    } catch (e: Exception) {
-                        callback.onError(e)
+                    Log.d("NETWORK REQUEST", response.code.toString())
+                    if (response.isSuccessful) {
+                        val body =
+                            response.body?.string()
+                                ?: throw java.lang.RuntimeException("body is null")
+                        try {
+                            callback.onSuccess(Unit)
+                        } catch (e: Exception) {
+                            callback.onError(e)
+                        }
+
+                    } else {
+                        callback.onError(Exception(response.message))
                     }
                 }
 
@@ -172,5 +155,42 @@ class PostRepositoryImpl : PostRepository {
                     callback.onError(e)
                 }
             })
+
+    }
+
+//TODO:Далее функция для упрощения кода clientNewCall
+
+    private fun clientNewCall(
+        id: Long,
+        callback: PostRepository.PostCallback<Post>,
+        request: Request
+    ) {
+        client.newCall(request)
+            .enqueue(object : Callback {
+
+                override fun onResponse(call: Call, response: Response) {
+                    Log.d("NETWORK REQUEST", response.code.toString())
+                    if (response.isSuccessful) {
+                        val body =
+                            response.body?.string()
+                                ?: throw java.lang.RuntimeException("body is null")
+                        try {
+                            callback.onSuccess(gson.fromJson(body, Post::class.java))
+                        } catch (e: Exception) {
+                            callback.onError(e)
+                        }
+
+                    } else {
+                        callback.onError(Exception(response.message))
+                    }
+                }
+
+                override fun onFailure(call: Call, e: IOException) {
+                    callback.onError(e)
+                }
+
+
+            })
     }
 }
+
